@@ -1,6 +1,7 @@
 'use client'
 import {$getRoot, $getSelection} from 'lexical';
 import {useEffect} from 'react';
+import {HeadingNode} from '@lexical/rich-text';
 
 import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
 import {LexicalComposer} from '@lexical/react/LexicalComposer';
@@ -13,12 +14,12 @@ import Toolbars from './Toolbars';
 const theme = {
     ltr: 'ltr',
     rtl: 'rtl',
-    paragraph: 'editor-paragraph text-yellow-200 ',
+    paragraph: '',
     quote: 'editor-quote',
     heading: {
-      h1: 'editor-heading-h1',
-      h2: 'editor-heading-h2',
-      h3: 'editor-heading-h3',
+      h1: 'text-2xl font-bold',
+      h2: 'text-xl font-bold',
+      h3: 'text-lg font-bold',
       h4: 'editor-heading-h4',
       h5: 'editor-heading-h5',
       h6: 'editor-heading-h6',
@@ -94,6 +95,7 @@ export default function Editor() {
     namespace: 'MyEditor',
     theme,
     onError,
+    nodes: [HeadingNode], // Add this line to register HeadingNode
   };
 
   return (
@@ -102,9 +104,9 @@ export default function Editor() {
       <RichTextPlugin
         contentEditable={
           <ContentEditable
-          className='focus:outline-none p-4'
+          className='focus:outline-none p-4 text-black bg-white rounded-lg'
             aria-placeholder={'Enter some text...'}
-            placeholder={<div>Enter some text...</div>}
+            placeholder={<div></div>}
           />
         }
         ErrorBoundary={LexicalErrorBoundary}
