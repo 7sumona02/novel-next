@@ -1,9 +1,10 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from './ui/button';
-import { FORMAT_TEXT_COMMAND, $getSelection, $isRangeSelection, SELECTION_CHANGE_COMMAND, $createParagraphNode } from 'lexical';
+import { FORMAT_TEXT_COMMAND, $getSelection, $isRangeSelection, SELECTION_CHANGE_COMMAND, $createParagraphNode, UNDO_COMMAND, REDO_COMMAND } from 'lexical';
 import { $createHeadingNode, $isHeadingNode, HeadingTagType } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
+import { Redo, Undo } from 'lucide-react';
 
 const Toolbars = () => {
     const [editor] = useLexicalComposerContext();
@@ -48,6 +49,22 @@ const Toolbars = () => {
 
     return (
         <div className='flex items-center py-4'>
+            <div className='flex mr-1.5'>
+            <Button 
+                onClick={() => {
+                    editor.dispatchCommand(UNDO_COMMAND, undefined);
+                }} 
+                variant="ghost"
+                className="text-black"
+                size="sm"><Undo /></Button>
+            <Button 
+                onClick={() => {
+                    editor.dispatchCommand(REDO_COMMAND, undefined);
+                }} 
+                variant="ghost"
+                className="text-black"
+                size="sm"><Redo /></Button>
+            </div>
             <div className='flex gap-1'>
             <Button 
                 onClick={() => {
