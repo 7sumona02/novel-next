@@ -2,7 +2,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from './ui/button';
 import { FORMAT_TEXT_COMMAND, $getSelection, $isRangeSelection, SELECTION_CHANGE_COMMAND, $createParagraphNode, UNDO_COMMAND, REDO_COMMAND, $getRoot } from 'lexical';
-import { $createHeadingNode, $isHeadingNode, HeadingTagType } from '@lexical/rich-text';
+import { $createHeadingNode, $isHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { Redo, Undo } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
@@ -85,7 +85,7 @@ const Toolbars = () => {
         }
 
         // Register update listener for auto-saving
-        return editor.registerUpdateListener(({ editorState }) => {
+        return editor.registerUpdateListener(({ }) => {
             handleSave();
         });
     }, [handleSave, editor]);
