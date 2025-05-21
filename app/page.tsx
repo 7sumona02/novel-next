@@ -4,7 +4,7 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div className='bg-neutral-200 min-h-screen w-screen relative'>
+    <div className='bg-neutral-200 min-h-dvh w-screen relative'>
       <h1 className='text-black text-center pt-10 underline font-sans'>notepad</h1>
       <div className='md:px-40 px-5 pb-20'>
         <Editor/>
