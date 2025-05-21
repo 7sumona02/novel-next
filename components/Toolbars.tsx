@@ -1,10 +1,11 @@
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from './ui/button';
-import { FORMAT_TEXT_COMMAND, $getSelection, $isRangeSelection, SELECTION_CHANGE_COMMAND, $createParagraphNode, UNDO_COMMAND, REDO_COMMAND } from 'lexical';
+import { FORMAT_TEXT_COMMAND, $getSelection, $isRangeSelection, SELECTION_CHANGE_COMMAND, $createParagraphNode, UNDO_COMMAND, REDO_COMMAND, $getRoot } from 'lexical';
 import { $createHeadingNode, $isHeadingNode, HeadingTagType } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { Redo, Undo } from 'lucide-react';
+import { useDebouncedCallback } from 'use-debounce';
 
 const Toolbars = () => {
     const [editor] = useLexicalComposerContext();
@@ -47,8 +48,50 @@ const Toolbars = () => {
         );
     }, [editor, updateToolbar]);
 
+    const handleSave = useDebouncedCallback(() => {
+        editor.update(() => {
+            const editorState = editor.getEditorState();
+            const jsonString = JSON.stringify(editorState.toJSON());
+            localStorage.setItem('editor-content', jsonString);
+        });
+    }, 1000); // 1 second delay
+
+    useEffect(() => {
+        // Load saved content when editor is initialized
+        const savedContent = localStorage.getItem('editor-content');
+        if (savedContent) {
+            const initialEditorState = editor.parseEditorState(savedContent);
+            if (!initialEditorState.isEmpty()) {
+                editor.setEditorState(initialEditorState);
+            } else {
+                // Create a default paragraph node if the state is empty
+                editor.update(() => {
+                    const root = $getRoot();
+                    if (root.isEmpty()) {
+                        const paragraph = $createParagraphNode();
+                        root.append(paragraph);
+                    }
+                });
+            }
+        } else {
+            // Initialize with an empty paragraph if no saved content
+            editor.update(() => {
+                const root = $getRoot();
+                if (root.isEmpty()) {
+                    const paragraph = $createParagraphNode();
+                    root.append(paragraph);
+                }
+            });
+        }
+
+        // Register update listener for auto-saving
+        return editor.registerUpdateListener(({ editorState }) => {
+            handleSave();
+        });
+    }, [handleSave, editor]);
+
     return (
-        <div className='flex items-center py-4'>
+        <div className='flex md:flex-row flex-col items-center pb-4 pt-8'>
             <div className='flex mr-1.5'>
             <Button 
                 onClick={() => {
@@ -144,6 +187,24 @@ const Toolbars = () => {
                     variant="ghost"
                     className={`text-black ${isHeading3 ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
                     size="sm">h3</Button>
+            </div>
+            <div className='ml-1.5 flex gap-1'>
+                <Button 
+                    onClick={handleSave} 
+                    variant="ghost"
+                    className="text-black cursor-pointer border rounded"
+                    size="sm">Save</Button>
+                <Button 
+                    onClick={() => {
+                        editor.update(() => {
+                            const root = $getRoot();
+                            root.clear();
+                            localStorage.removeItem('editor-content');
+                        });
+                    }} 
+                    variant="ghost"
+                    className="text-red-500 cursor-pointer border border-red-500 rounded"
+                    size="sm">Clear</Button>
             </div>
         </div>
     )

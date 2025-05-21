@@ -104,7 +104,7 @@ export default function Editor() {
       <RichTextPlugin
         contentEditable={
           <ContentEditable
-          className='focus:outline-none p-4 text-black bg-white rounded-lg'
+          className='focus:outline-none p-4 text-black bg-white rounded-lg min-h-60'
             aria-placeholder={'Enter some text...'}
             placeholder={<div></div>}
           />
