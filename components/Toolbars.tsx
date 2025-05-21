@@ -6,6 +6,7 @@ import { $createHeadingNode, $isHeadingNode } from '@lexical/rich-text';
 import { $setBlocksType } from '@lexical/selection';
 import { Redo, Undo } from 'lucide-react';
 import { useDebouncedCallback } from 'use-debounce';
+import { toast, Toaster } from 'sonner';
 
 const Toolbars = () => {
     const [editor] = useLexicalComposerContext();
@@ -53,160 +54,131 @@ const Toolbars = () => {
             const editorState = editor.getEditorState();
             const jsonString = JSON.stringify(editorState.toJSON());
             localStorage.setItem('editor-content', jsonString);
+            toast.success('Content saved successfully!');
         });
-    }, 1000); // 1 second delay
-
-    useEffect(() => {
-        // Load saved content when editor is initialized
-        const savedContent = localStorage.getItem('editor-content');
-        if (savedContent) {
-            const initialEditorState = editor.parseEditorState(savedContent);
-            if (!initialEditorState.isEmpty()) {
-                editor.setEditorState(initialEditorState);
-            } else {
-                // Create a default paragraph node if the state is empty
-                editor.update(() => {
-                    const root = $getRoot();
-                    if (root.isEmpty()) {
-                        const paragraph = $createParagraphNode();
-                        root.append(paragraph);
-                    }
-                });
-            }
-        } else {
-            // Initialize with an empty paragraph if no saved content
-            editor.update(() => {
-                const root = $getRoot();
-                if (root.isEmpty()) {
-                    const paragraph = $createParagraphNode();
-                    root.append(paragraph);
-                }
-            });
-        }
-
-        // Register update listener for auto-saving
-        return editor.registerUpdateListener(({ }) => {
-            handleSave();
-        });
-    }, [handleSave, editor]);
+    }, 1000);
 
     return (
-        <div className='flex md:flex-row flex-col items-center pb-4 pt-8'>
-            <div className='flex mr-1.5'>
-            <Button 
-                onClick={() => {
-                    editor.dispatchCommand(UNDO_COMMAND, undefined);
-                }} 
-                variant="ghost"
-                className="text-black"
-                size="sm"><Undo /></Button>
-            <Button 
-                onClick={() => {
-                    editor.dispatchCommand(REDO_COMMAND, undefined);
-                }} 
-                variant="ghost"
-                className="text-black"
-                size="sm"><Redo /></Button>
-            </div>
-            <div className='flex gap-1'>
-            <Button 
-                onClick={() => {
-                    editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
-                }} 
-                variant="ghost"
-                className={`text-black ${isBold ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
-                size="sm">B</Button>
-            <Button 
-                onClick={() => {
-                    editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
-                }} 
-                variant="ghost"
-                className={`text-black ${isItalic ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
-                size="sm">I</Button>
-            <Button 
-                onClick={() => {
-                    editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
-                }} 
-                variant="ghost"
-                className={`text-black ${isUnderline ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
-                size="sm">U</Button>
-            <Button 
-                onClick={() => {
-                    editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
-                }} 
-                variant="ghost"
-                className={`text-black ${isStrikethrough ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
-                size="sm">S</Button>
-            </div>
-            <div className='ml-1.5 flex gap-1'>
+        <>
+            <Toaster position="bottom-left" />
+            <div className='flex md:flex-row flex-col items-center pb-4 pt-8'>
+                <div className='flex mr-1.5'>
                 <Button 
                     onClick={() => {
-                        editor.update(() => {
-                            const selection = $getSelection();
-                            if ($isRangeSelection(selection)) {
-                                if (isHeading1) {
-                                    $setBlocksType(selection, () => $createParagraphNode());
-                                } else {
-                                    $setBlocksType(selection, () => $createHeadingNode('h1'));
+                        editor.dispatchCommand(UNDO_COMMAND, undefined);
+                    }} 
+                    variant="ghost"
+                    className="text-black"
+                    size="sm"><Undo /></Button>
+                <Button 
+                    onClick={() => {
+                        editor.dispatchCommand(REDO_COMMAND, undefined);
+                    }} 
+                    variant="ghost"
+                    className="text-black"
+                    size="sm"><Redo /></Button>
+                </div>
+                <div className='flex gap-1'>
+                <Button 
+                    onClick={() => {
+                        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "bold");
+                    }} 
+                    variant="ghost"
+                    className={`text-black ${isBold ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
+                    size="sm">B</Button>
+                <Button 
+                    onClick={() => {
+                        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "italic");
+                    }} 
+                    variant="ghost"
+                    className={`text-black ${isItalic ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
+                    size="sm">I</Button>
+                <Button 
+                    onClick={() => {
+                        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "underline");
+                    }} 
+                    variant="ghost"
+                    className={`text-black ${isUnderline ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
+                    size="sm">U</Button>
+                <Button 
+                    onClick={() => {
+                        editor.dispatchCommand(FORMAT_TEXT_COMMAND, "strikethrough");
+                    }} 
+                    variant="ghost"
+                    className={`text-black ${isStrikethrough ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
+                    size="sm">S</Button>
+                </div>
+                <div className='ml-1.5 flex gap-1'>
+                    <Button 
+                        onClick={() => {
+                            editor.update(() => {
+                                const selection = $getSelection();
+                                if ($isRangeSelection(selection)) {
+                                    if (isHeading1) {
+                                        $setBlocksType(selection, () => $createParagraphNode());
+                                    } else {
+                                        $setBlocksType(selection, () => $createHeadingNode('h1'));
+                                    }
                                 }
-                            }
-                        });
-                    }} 
-                    variant="ghost"
-                    className={`text-black ${isHeading1 ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
-                    size="sm">h1</Button>
-                <Button 
-                    onClick={() => {
-                        editor.update(() => {
-                            const selection = $getSelection();
-                            if ($isRangeSelection(selection)) {
-                                if (isHeading2) {
-                                    $setBlocksType(selection, () => $createParagraphNode());
-                                } else {
-                                    $setBlocksType(selection, () => $createHeadingNode('h2'));
+                            });
+                        }} 
+                        variant="ghost"
+                        className={`text-black ${isHeading1 ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
+                        size="sm">h1</Button>
+                    <Button 
+                        onClick={() => {
+                            editor.update(() => {
+                                const selection = $getSelection();
+                                if ($isRangeSelection(selection)) {
+                                    if (isHeading2) {
+                                        $setBlocksType(selection, () => $createParagraphNode());
+                                    } else {
+                                        $setBlocksType(selection, () => $createHeadingNode('h2'));
+                                    }
                                 }
-                            }
-                        });
-                    }} 
-                    variant="ghost"
-                    className={`text-black ${isHeading2 ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
-                    size="sm">h2</Button>
-                <Button 
-                    onClick={() => {
-                        editor.update(() => {
-                            const selection = $getSelection();
-                            if ($isRangeSelection(selection)) {
-                                if (isHeading3) {
-                                    $setBlocksType(selection, () => $createParagraphNode());
-                                } else {
-                                    $setBlocksType(selection, () => $createHeadingNode('h3'));
+                            });
+                        }} 
+                        variant="ghost"
+                        className={`text-black ${isHeading2 ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
+                        size="sm">h2</Button>
+                    <Button 
+                        onClick={() => {
+                            editor.update(() => {
+                                const selection = $getSelection();
+                                if ($isRangeSelection(selection)) {
+                                    if (isHeading3) {
+                                        $setBlocksType(selection, () => $createParagraphNode());
+                                    } else {
+                                        $setBlocksType(selection, () => $createHeadingNode('h3'));
+                                    }
                                 }
-                            }
-                        });
-                    }} 
-                    variant="ghost"
-                    className={`text-black ${isHeading3 ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
-                    size="sm">h3</Button>
+                            });
+                        }} 
+                        variant="ghost"
+                        className={`text-black ${isHeading3 ? 'bg-neutral-300 hover:bg-neutral-300' : ''}`}
+                        size="sm">h3</Button>
+                </div>
+                <div className='ml-1.5 flex gap-1'>
+                    <Button 
+                        onClick={handleSave} 
+                        variant="ghost"
+                        className="text-black cursor-pointer border rounded"
+                        size="sm">Save</Button>
+                    <Button 
+                        onClick={() => {
+                            editor.update(() => {
+                                const root = $getRoot();
+                                root.clear();
+                                localStorage.removeItem('editor-content');
+                                toast.success('Content cleared successfully!');
+                            });
+                        }} 
+                        variant="ghost"
+                        className="text-red-500 cursor-pointer border border-red-500 rounded"
+                        size="sm">Clear</Button>
+                </div>
             </div>
-            <div className='ml-1.5 flex gap-1'>
-                <Button 
-                    onClick={handleSave} 
-                    variant="ghost"
-                    className="text-black cursor-pointer border rounded"
-                    size="sm">Save</Button>
-                <Button 
-                    onClick={() => {
-                        editor.update(() => {
-                            const root = $getRoot();
-                            root.clear();
-                            localStorage.removeItem('editor-content');
-                        });
-                    }} 
-                    variant="ghost"
-                    className="text-red-500 cursor-pointer border border-red-500 rounded"
-                    size="sm">Clear</Button>
-            </div>
-        </div>
+        </>
     )
 }
 
