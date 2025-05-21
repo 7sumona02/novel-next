@@ -60,7 +60,7 @@ const Toolbars = () => {
 
     return (
         <>
-            <Toaster position="bottom-left" />
+            <Toaster position="bottom-right" />
             <div className='flex md:flex-row flex-col items-center pb-4 pt-8'>
                 <div className='flex mr-1.5'>
                 <Button 
